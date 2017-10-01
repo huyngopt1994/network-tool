@@ -17,7 +17,7 @@ def client_sender(buffer):
     # create socket
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     try:
-        client.connect(target,port)
+        client.connect((target,port))
         if len(buffer):
             client.send(buffer)
 
@@ -42,8 +42,8 @@ def client_sender(buffer):
 
             # send it off
             client.send(buffer)
-    except :
-        print("Exception, exiting")
+    except Exception as e :
+        print("Exception, exiting :%s " %e)
 
         # Tear Down
         client.close()
@@ -90,9 +90,9 @@ def main():
         if o in ("-e","--execute"):
             execute = a
         if o in ("-t","--target"):
-            target = True
+            target = a
         if o in ("-p","--port"):
-            port = True
+            port = int(a)
         if o in ("-c","--command"):
             command = True
         if o in ("-u","--upload"):
@@ -102,11 +102,10 @@ def main():
 
 
     # are you going to listen or just send data from stdin ?
-    if not listen and len(target) and port >0:
+    if not listen and len(target) and port > 0:
         # read in buffer from the command line
         # this will block,  so send CTRL-D if not sending input to stdin
-        buffer = sys.stdin.read()
-
+        buffer = raw_input('press some thing to get data :')
         # send data off
         client_sender(buffer)
 
