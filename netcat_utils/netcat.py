@@ -13,6 +13,41 @@ target = ""
 upload_destination = ""
 port = 0
 
+def client_sender(buffer):
+    # create socket
+    client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    try:
+        client.connect(target,port)
+        if len(buffer):
+            client.send(buffer)
+
+        while True:
+
+            # now wait for data back
+            recv_len = 1
+            response = ""
+
+            while recv_len:
+
+                data = client.recv(4096)
+                recv_len = len(data)
+                response += data
+                if recv_len < 4096 :
+                    break
+
+            print response
+            # print wait for more input
+            buffer = raw_input('press more : ')
+            buffer += "\n"
+
+            # send it off
+            client.send(buffer)
+    except :
+        print("Exception, exiting")
+
+        # Tear Down
+        client.close()
+
 def usage():
     print "Netcat tool"
     print
