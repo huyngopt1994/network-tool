@@ -1,6 +1,7 @@
 import sys
 import socket
 import getopt
+import gevent
 import threading
 import subprocess
 
@@ -47,6 +48,99 @@ def client_sender(buffer):
 
         # Tear Down
         client.close()
+
+def server_loop():
+    global target
+
+    # if no target is defined , we listen on all interfaces
+    if not len(target):
+        target = "0.0.0.0"
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((target,port))
+    server.listen(5)
+    while True:
+        client_socket , addr = server.accept()
+
+        # spin off a gevent greenlet  to hanlde our new client
+        gevent.spawn(client_handler , client_socket)
+
+
+def run_command(command):
+
+    # trim the newline
+    command = command.rstrip()
+
+    # run the command and get the ouput back
+    try :
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    except:
+        output = "Failed to execute command.\r\n"
+
+    # send the output back to the client
+    return output
+
+# implement the logic to do file uploads, command execution, and our shell
+
+def client_handler(client_socket):
+    global upload
+    global execute
+    global command
+
+    # check for upload:
+    if len(upload_destination):
+
+        # read in all of bytes and write to our destination
+        file_buffer = ""
+
+        # keep reading data until none is avaiable
+        while True:
+            data = client_socket.recv(1024)
+
+            if not data:
+                break
+            else:
+                file_buffer += data
+
+        # now we take these bytes and try to write them out
+        try:
+            file_description = open(upload_destination,"wb")
+            file_description.write(file_buffer)
+            file_description.close()
+
+            # acknowledge that we wrote the file out
+            client_socket.send('Successfully save file to %s \r\n' % upload_destination)
+        except:
+            client_socket.send('Failed to save file to %s\r\n' % upload_destination)
+        gevent.idle()
+
+    # check for command execution
+
+    if len(execute):
+
+        # run the command
+        output = run_command(execute)
+
+        client_socket.send(output)
+
+    # now we go into another loop if a comand shell was requested
+
+    if command:
+        while True:
+            # Show a simple prompt
+            client_socket.send("<BHP:#>")
+
+
+            cmd_buffer = ""
+            while "\n" not in cmd_buffer:
+                cmd_buffer += client_socket.recv(1024)
+
+            # send back the command output
+            response = run_command(cmd_buffer)
+            gevent.idle()
+            # send back the response
+            client_socket.send(response)
+            gevent.idle()
 
 def usage():
     print "Netcat tool"
