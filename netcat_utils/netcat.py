@@ -4,7 +4,8 @@ import getopt
 import gevent
 import threading
 import subprocess
-
+import logging
+from log import Logger
 # define some global variables
 listen = False
 command = False
@@ -13,6 +14,8 @@ execute = ""
 target = ""
 upload_destination = ""
 port = 0
+
+my_log = Logger('my_netcat', logging.DEBUG, 'my_netcat').boostrap()
 
 def client_sender(buffer):
     # create socket
@@ -51,6 +54,8 @@ def client_sender(buffer):
 
 def server_loop():
     global target
+
+    my_log.info('create a server loop')
 
     # if no target is defined , we listen on all interfaces
     if not len(target):
