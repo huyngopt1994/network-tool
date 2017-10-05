@@ -64,11 +64,14 @@ def server_loop():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((target,port))
     server.listen(5)
+    my_log.info('create a server loop at ip %s ,at port %s' %(target,port))
     while True:
         client_socket , addr = server.accept()
-
+        print('get a client_socket')
         # spin off a gevent greenlet  to hanlde our new client
-        gevent.spawn(client_handler , client_socket)
+        thread = threading.Thread(target=client_handler, args=(client_socket,))
+        thread.start()
+     #   gevent.spawn(client_handler, client_socket)
 
 
 def run_command(command):
@@ -88,10 +91,12 @@ def run_command(command):
 # implement the logic to do file uploads, command execution, and our shell
 
 def client_handler(client_socket):
+  
     global upload
     global execute
     global command
 
+    my_log.info('get a client handler')
     # check for upload:
     if len(upload_destination):
 
@@ -117,7 +122,7 @@ def client_handler(client_socket):
             client_socket.send('Successfully save file to %s \r\n' % upload_destination)
         except:
             client_socket.send('Failed to save file to %s\r\n' % upload_destination)
-        gevent.idle()
+       # gevent.idle()
 
     # check for command execution
 
@@ -131,6 +136,8 @@ def client_handler(client_socket):
     # now we go into another loop if a comand shell was requested
 
     if command:
+        my_log.info("in command mode")
+
         while True:
             # Show a simple prompt
             client_socket.send("<BHP:#>")
@@ -140,12 +147,13 @@ def client_handler(client_socket):
             while "\n" not in cmd_buffer:
                 cmd_buffer += client_socket.recv(1024)
 
+            my_log.info("get cmd buffer from client %s", cmd_buffer)
             # send back the command output
             response = run_command(cmd_buffer)
-            gevent.idle()
+          #  gevent.idle()
             # send back the response
             client_socket.send(response)
-            gevent.idle()
+         #   gevent.idle()
 
 def usage():
     print "Netcat tool"
@@ -174,14 +182,13 @@ def main():
 
     # read the command line options
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu",
+        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:",
                                    ["help","listen","execute","target","port","command","upload"])
     except getopt.GetoptError as e :
         print(str(e))
         usage()
 
-
-    for o,a in opts:
+    for o, a in opts:
         if o in ("-h","--help"):
             usage()
         if o in ("-l","--listen"):
