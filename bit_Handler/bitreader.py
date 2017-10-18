@@ -36,7 +36,7 @@ class BitReader(object):
                 num |= 1
             mask >>= 1
             self.bit_pos -= 1
-
+            print (self.bit_pos)
             if self.bit_pos < 0:
                 if self.byte is None:
                     raise  BitReadError("Beyond buffer doundary")
@@ -48,6 +48,8 @@ class BitReader(object):
                     self.byte = None
 
                 self.index += 1
+                print('this is where we need to plus index')
+                print self.index
         return  num
 
 if __name__ == '__main__':
@@ -55,5 +57,9 @@ if __name__ == '__main__':
     num_bits = sys.argv[2]
 
     bit_object = BitReader(buffer)
-
-    num = bit_object.get_bits(int(num_bits))
+    print('the first')
+    num1 = bit_object.get_bits(int(num_bits))
+    print('the second')
+    num2 = bit_object.get_bits(int(num_bits))
+    print('the third')
+    num3 = bit_object.get_bits(int(num_bits))
