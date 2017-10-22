@@ -2,6 +2,20 @@
 from time import time
 
 class Timer(object):
+    """
+    Using : We have 2 ways to handle this timer
+    1. Using context manager technic (with .... as
+    to start and stop this timer automatically)
+    Example :
+    with Timer() as my_timer :
+        do some thing
+
+    print(my_timer.total)
+
+    2. Create a instance of timer and using his method start,stop
+    to handle this timer
+
+    """
     def __init__(self, start_time= None, stop_time= None, auto_start=True):
         self.start_time = start_time
         self.stop_time = stop_time
