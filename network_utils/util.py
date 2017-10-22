@@ -1,5 +1,13 @@
 '''Contain the util for our tools  '''
+import logging
+import os
+import signal
+
 from time import time
+
+import gevent
+
+log = logging.getLogger(__name__)
 
 class Timer(object):
     """
@@ -23,9 +31,11 @@ class Timer(object):
             self.start()
 
     def start(self):
+        log.info('start timer')
         self.start_time = self.start_time or round(time(), 2)
 
     def stop(self):
+        log.info('stop timer')
         self.stoptime = self.stop_time or round(time(), 2)
 
     @property
@@ -42,3 +52,48 @@ class Timer(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
+
+"""Boostraping code."""
+
+def run_until_terminated(cleanup=None, timeout=3.0):
+    """Keep the application alive until interrupted.
+
+    Rememeber to use this method in main thread .
+    This method  will be interupted if either the SIGTERM
+    or SIGINT are trapped. On termination, if a cleanup callable
+    was passed in, it will be called with the supplied keyword arguments.
+
+    Args:
+        cleanup : A callable method which should be executed to release any
+        resources.
+
+        timeout : The maxium of seconds to wait for the cleanup method to complete
+        before  forceably killing that greenlet
+    """
+
+    def terminate(signum):
+        log.info('Terminating with signal %s', signum)
+
+        if cleanup:
+            log.debug('Clean up')
+
+            cleanup_greenlet = gevent.spawn(cleanup, signum)
+            cleanup_greenlet.join(timeout=timeout)
+            cleanup_greenlet.kill()
+
+        run_until_terminated.stopped = True
+
+        kill_signal = signal.SIGKILL
+        if 'COVERAGE' in os.environ:
+            kill_signal = signal.SIGTERM
+        os.kill(os.getpid(),kill_signal)
+
+    # Start 2 greenlet to handle the signal 
+    gevent.signal(signal.SIGTERM,terminate, signal.SIGTERM)
+    gevent.signal(signal.SIGINT, terminate, signal.SIGINT)
+
+    while not run_until_terminated.stopped:
+        gevent.sleep(1)
+
+# set this attribute default False when import it
+run_until_terminated.stopped = False
