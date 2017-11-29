@@ -88,7 +88,7 @@ def run_until_terminated(cleanup=None, timeout=3.0):
             kill_signal = signal.SIGTERM
         os.kill(os.getpid(),kill_signal)
 
-    # Start 2 greenlet to handle the signal 
+    # Start 2 greenlet to handle the signal
     gevent.signal(signal.SIGTERM,terminate, signal.SIGTERM)
     gevent.signal(signal.SIGINT, terminate, signal.SIGINT)
 
