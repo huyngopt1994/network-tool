@@ -1,2 +1,5 @@
+from time import sleep
 def main():
-    print('check if it run or not')
+    while True :
+        print('check if it run or not')
+        sleep(3)
