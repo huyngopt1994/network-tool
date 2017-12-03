@@ -10,7 +10,7 @@ setup(name="ftp-utils",
       include_package_data=True,
       entry_points={
           "console_scripts": [
-              "ftp-server = server:server:main",
+              "ftp-server = server.server:main",
           ]
       }
 )
