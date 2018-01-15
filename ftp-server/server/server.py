@@ -17,7 +17,7 @@ def main():
                         help="adress for ftp server, default: 0.0.0.0:9100")
     parser.add_argument("-u","--user", required=True,
                         help="user for ftp server")
-    parser.add_argument("-p","--pasword",required=True,
+    parser.add_argument("-p","--password",required=True,
                         help="password for ftp server")
     parser.add_argument("-d","--directory",
                         help="home directory for ftp server,default: /tmp/")
