@@ -24,9 +24,8 @@ def main():
 
     options = parser.parse_args()
     logging.basicConfig(level=logging.DEBUG)
-
-    host, port = (options.address.split(":",2)
-                  if options.address else None,None)
+    host, port = (options.address.split(":")
+                  if options.address else [None,None])
 
     if port:
         try :
