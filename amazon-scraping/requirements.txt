@@ -1,0 +1,4 @@
+html2text
+scrapy
+scrapyd
+scrapyd-client
