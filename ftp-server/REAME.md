@@ -8,4 +8,16 @@ Step to use this simple ftp-server :
 
 2./ After make env => cd to env directory  run 
     
-    ./ftp-server [some parameters] 
+    ./bin/ftp-server [some parameters] 
+Using : 
+  -h, --help            show this help message and exit
+  -a ADDRESS, --address ADDRESS
+                        adress for ftp server, default: 0.0.0.0:9100
+  -u USER, --user USER  user for ftp server
+  -p PASSWORD, --password PASSWORD
+                        password for ftp server
+  -d DIRECTORY, --directory DIRECTORY
+                        home directory for ftp server,default: /tmp/
+
+Simple example : ./bin/ftp-sever -u huy -p huy
+=> Create ftp server: at ftp://huy:huy@0.0.0.0:9100/tmp/
